@@ -11,7 +11,7 @@ from src.cbs import (
     visualize_cbs,
     calculate_solution_cost
 )
-from examples.utils import read_map_file, get_boundary_positions, ensure_dir  # Changed from .utils
+from examples.utils import read_map_file, get_boundary_positions, ensure_dir  
 
 def create_random_problem(height: int, width: int, 
                          obstacles: Set[Tuple[int, int]], 
@@ -62,7 +62,7 @@ def run_cbs_example(map_file: str, num_agents: int, time_limit: float = 60.0):
         print(f"Runtime: {runtime:.2f} seconds")
 
 def main():
-    map_file = "maps/empty-32-32.map"  # Update with your map path
+    map_file = "maps/empty-32-32.map"  
     run_cbs_example(map_file, num_agents=30)
 
 if __name__ == "__main__":
