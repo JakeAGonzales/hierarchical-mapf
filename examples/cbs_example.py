@@ -25,45 +25,41 @@ def create_random_problem(height: int, width: int,
     positions = random.sample(boundary, 2 * num_agents)
     agent_pos = positions[:num_agents]
     goals = positions[num_agents:]
-    
-    # Use Environment directly instead of GridWorld
+ 
     env = Environment((height, width), list(obstacles), agent_pos)
     return MAPFProblem(env, goals)
 
-def run_cbs_example(map_file: str, num_agents: int, time_limit: float = 60.0):
-    # Ensure gifs directory exists
+def run_cbs_example(map_file: str, num_agents: int, create_vis: bool, time_limit: float = 60.0):
     gif_dir = Path(__file__).parent / "gifs"
     ensure_dir(gif_dir)
     
-    # Read map and create problem
     print(f"\nReading map file: {map_file}")
     height, width, obstacles = read_map_file(map_file)
+    #height, width = 8,8
     problem = create_random_problem(height, width, obstacles, num_agents)
     
-    # Run CBS
     print(f"\nRunning CBS with {num_agents} agents...")
     start_time = time.time()
     solution = conflict_based_search(problem, time_limit=time_limit)
     runtime = time.time() - start_time
     
-    # Report results
     if solution:
         print("\nSolution found!")
         print(f"Runtime: {runtime:.2f} seconds")
         print(f"Makespan: {solution.makespan}")
         print(f"Total solution cost: {calculate_solution_cost(solution)}")
         
-        # Create visualization
-        gif_path = gif_dir / f"cbs_{num_agents}_agents.gif"
-        print(f"\nCreating visualization: {gif_path}")
-        visualize_cbs(problem, solution, str(gif_path))
+        if create_vis: 
+            gif_path = gif_dir / f"cbs_{num_agents}_agents.gif"
+            print(f"\nCreating visualization: {gif_path}")
+            visualize_cbs(problem, solution, str(gif_path))
     else:
         print("\nNo solution found.")
         print(f"Runtime: {runtime:.2f} seconds")
 
 def main():
     map_file = "maps/empty-32-32.map"  
-    run_cbs_example(map_file, num_agents=30)
+    run_cbs_example(map_file, num_agents=12, create_vis=True)
 
 if __name__ == "__main__":
     main()
