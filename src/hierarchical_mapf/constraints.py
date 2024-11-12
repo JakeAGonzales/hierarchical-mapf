@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Tuple
 
-from mapf_utils import (
+from .mapf_utils import (
     Goal,
     LocationGoal,
     SetGoal,

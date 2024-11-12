@@ -3,7 +3,7 @@ import networkx as nx
 from typing import Dict, List, Tuple, Any
 import copy
 
-from mapf_utils import (
+from .mapf_utils import (
     Environment,
     GridWorld,
     PathVertex,

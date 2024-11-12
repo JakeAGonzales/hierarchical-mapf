@@ -2,7 +2,7 @@ import networkx as nx
 import numpy as np
 from typing import Dict, List, Tuple, Optional
 
-from mapf_utils import PathVertex, LocationGoal
+from .mapf_utils import PathVertex, LocationGoal
 
 from .core import HierarchicalEnvironment
 

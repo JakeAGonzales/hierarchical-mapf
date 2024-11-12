@@ -3,7 +3,7 @@ import time
 import copy
 from typing import Dict, List, Tuple, Optional, Any
 
-from mapf_utils import (
+from .mapf_utils import (
     PathVertex,
     PathEdge,
     Path,

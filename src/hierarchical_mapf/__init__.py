@@ -1,19 +1,33 @@
-from .core import GridRegion, HierarchicalEnvironment, ColumnLatticeEnvironment
-from .constraints import BoundaryGoal
+from .core import (
+    GridRegion,
+    HierarchicalEnvironment,
+    CBSNode,
+    HCBSNode
+)
+
+from .constraints import (
+    BoundaryGoal,
+    RegionActionGenerator
+)
+
 from .search import (
     hierarchical_cbs,
     init_hcbs,
-    conflict_based_search,
+    conflict_based_search
 )
-from .utils import random_problem
+
+from .utils import (
+    get_solution_metrics,
+    verify_solution,
+    column_lattice_obstacles,
+    random_problem
+)
 
 from .visualization import (
-    EnvironmentRenderer,
-    MAPFAnimator,
-    draw_environment_state
+    create_solution_animation
 )
 
-from mapf_utils import (
+from .mapf_utils import (
     Environment,
     GridWorld,
     PathVertex,
@@ -26,22 +40,27 @@ from mapf_utils import (
     MAPFSolution
 )
 
-__version__ = "0.1.0"
 __all__ = [
     'GridRegion',
     'HierarchicalEnvironment',
-    'ColumnLatticeEnvironment',
+    'CBSNode',
+    'HCBSNode',
     'BoundaryGoal',
+    'RegionActionGenerator',
     'hierarchical_cbs',
     'init_hcbs',
     'conflict_based_search',
+    'get_solution_metrics',
+    'verify_solution',
+    'column_lattice_obstacles',
     'random_problem',
     'EnvironmentRenderer',
     'MAPFAnimator',
-    'draw_environment_state'
+    'draw_environment_state',
+    'create_solution_animation',
     # From mapf_utils
     'Environment',
-    'GridWorld', 
+    'GridWorld',
     'PathVertex',
     'PathEdge',
     'Path',

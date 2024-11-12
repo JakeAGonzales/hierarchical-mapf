@@ -3,6 +3,7 @@
 import os
 import time
 from pathlib import Path
+
 from src.routing_game import (
     AbstractedRoutingGame,
     RoutingGameConfig,
