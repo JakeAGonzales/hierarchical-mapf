@@ -1,22 +1,26 @@
-from .core import HierarchicalMAPF, run_hierarchical_mapf
-from .regions import RegionalEnvironment, SimpleGridRegion, SimpleRegionalEnvironment
-from .search import CBSNode, regional_cbs, update_region, advance_agents
-from .constraints import RegionActionGenerator, ConstraintSet
-from .visualization import create_solution_gif, verify_collisions, verify_path_validity
+from .core import HCBS, HCBSConfig, HCBSNode
+from .regions import RegionalEnvironment, GridRegion, SimpleRegionalEnvironment
+from .cbs_node import CBSNode
+from .constraints import (
+    RegionActionGenerator,
+    ConstraintSet,
+    LocationGoal,
+    BoundaryGoal
+)
+from .visualization import create_solution_animation, verify_solution
 
 __all__ = [
-    'HierarchicalMAPF',
-    'run_hierarchical_mapf',
+    'HCBS',
+    'HCBSConfig',
+    'HCBSNode',
     'RegionalEnvironment',
-    'SimpleGridRegion',
+    'GridRegion',
     'SimpleRegionalEnvironment',
     'CBSNode',
-    'regional_cbs',
-    'update_region',
-    'advance_agents',
     'RegionActionGenerator',
     'ConstraintSet',
-    'create_solution_gif',
-    'verify_collisions',
-    'verify_path_validity'
+    'LocationGoal',
+    'BoundaryGoal',
+    'create_solution_animation',
+    'verify_solution'
 ]
