@@ -1,8 +1,7 @@
-from .core import AbstractedRoutingGame, get_canonical_edge
-from .flow import frank_wolfe_step, normalize_flows, calculate_edge_costs
+from .core import AbstractedRoutingGame, get_canonical_edge, RoutingGameConfig
 from .visualization import (
     visualize_flows, 
-    create_flow_animation, 
+    create_combined_animation, 
     plot_cost_evolution, 
     create_combined_animation
 )
@@ -11,6 +10,7 @@ from .paths import extract_deterministic_paths, analyze_paths
 
 __all__ = [
     'AbstractedRoutingGame',
+    'RoutingGameConfig',
     'get_canonical_edge',
     'frank_wolfe_step',
     'normalize_flows',
