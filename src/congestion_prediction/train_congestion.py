@@ -157,20 +157,21 @@ def plot_training_progress(train_losses: List[float], val_losses: List[float]) -
 
 if __name__ == "__main__":
     set_seed(69)
+    
     config = {
         "num_of_epochs": 30,
-        "lr": 0.00001,
-        "weight_decay": 5e-4,
+        "lr": 0.001,
+        "weight_decay": 1e-5,
         "hidden_channels": 8,
         "in_channels": 3,
         "out_channels": 1,
         "num_gnn_layers": 1,
-        "num_attention_heads": 2,
+        "num_attention_heads": 1,
         "batch_size": 16,
         "dropout_rate": 0.2,
-        "max_time_steps": 31,        # make sure to change max time steps and grid size
-        "data_folder": "data/16x16/train",
-        "grid_size": 16,
+        "max_time_steps": 16,        # make sure to change max time steps and grid size
+        "data_folder": "data/8x8/train",
+        "grid_size": 8,
     }
     
     train_losses, val_losses = train_model(config)

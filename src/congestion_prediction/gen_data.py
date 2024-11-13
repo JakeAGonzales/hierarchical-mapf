@@ -49,10 +49,10 @@ def task(args):
 if __name__ == "__main__":
     # Configuration
     n_cpus = 8
-    total_examples = 1000
-    grid_size = 16  # w x h
+    total_examples = 2000
+    grid_size = 8  # w x h
     
-    agent_range = (4, 16) 
+    agent_range = (2, 10) 
 
     test_seeds = [24601, 42069, 87654, 13579, 99999, 54321, 11111, 77777]
     train_seeds = [18427, 31072, 53165, 57585, 75815, 89991, 92318, 98555]
@@ -65,7 +65,7 @@ if __name__ == "__main__":
         
         # Generate train data (uncomment to use)
         #p.map(task, [(seed, total_examples // n_cpus, grid_size, agent_range) 
-        #             for seed in train_seeds])
+         #            for seed in train_seeds])
     
     print(f"Completed {grid_size}x{grid_size} grid")
 

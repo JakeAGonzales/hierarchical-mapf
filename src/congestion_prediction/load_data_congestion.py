@@ -139,7 +139,7 @@ def load_data(data_folder: str, grid_size: int = 16) -> Tuple[List[Data], int]:
     return pyg_dataset, max_time_steps
 
 if __name__ == "__main__":
-    data_folder = "data/16x16/train"
+    data_folder = "data/8x8/train"
     pyg_dataset, max_time_steps = load_data(data_folder)
     print(f"Loaded {len(pyg_dataset)} instances with max time steps: {max_time_steps}")
     print(f"First instance features shape: {pyg_dataset[0].x.shape}")
