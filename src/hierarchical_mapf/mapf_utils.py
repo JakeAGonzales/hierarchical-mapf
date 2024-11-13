@@ -57,48 +57,6 @@ class GridWorld(Environment):
             mat[*o] = GridWorld.OBSTACLE
         return mat
 
-# draw the state of the provided environment
-def draw_environment(ax, env: Environment, agent_pos: dict, goals: dict, arrows=True, animated=False, grid=False):
-    tab20b = colormaps.get_cmap('tab20b')
-    colors = tab20b(list(range(20)))
-    black = np.array([0,0,0,1])
-    white = np.array([1, 1, 1, 1])
-    colors[0,:] = white
-    colors[1,:] = black
-    get_color_idx = lambda id: 2+(id % 18)
-    mat = env.dense_matrix()
-    for id in goals:
-        mat[*agent_pos[id]] = get_color_idx(id)
-    
-    cmap = ListedColorMap(colors)
-    image = ax.imshow(mat, cmap=cmap, animated=True)
-
-    if grid:
-        # Major ticks
-        ax.set_xticks(np.arange(0, mat.shape[1], 1))
-        ax.set_yticks(np.arange(0, mat.shape[0], 1))
-
-
-        # Minor ticks
-        ax.set_xticks(np.arange(-.5, mat.shape[1], 1), minor=True)
-        ax.set_yticks(np.arange(-.5, mat.shape[0], 1), minor=True)
-
-        # Gridlines based on minor ticks
-        ax.grid(which='minor', color='black', linestyle='-', linewidth=1)
-
-        # Remove minor ticks
-        ax.tick_params(which='minor', bottom=False, left=False)
-
-    # make arrows pointing agents to their goals
-    if arrows:
-        for id in goals:
-            start_y, start_x = agent_pos[id] 
-            end_y, end_x = goals[id]
-            dx = end_x - start_x
-            dy = end_y - start_y
-            ax.arrow(start_x, start_y, dx, dy, head_width = 0.2, head_length = 0.2, alpha=.5)
-    return image
-
 class Constraint:
     def __init__(self):
         raise NotImplementedError()
@@ -149,7 +107,6 @@ class PathEdge(Constraint):
         self.p2 = copy.deepcopy(p2)
         self.t = t
 
-    # compliment is used for checking for this edge in hash tables
     def compliment(self):
         return PathEdge(self.p2, self.p1, self.t)
 
@@ -191,7 +148,6 @@ class Path:
         return len(self.vertexes)
     
     def __add__(self, other):
-        # Determine order of paths based on start time
         if self.vertexes[0].t < other.vertexes[0].t:
             first = self
             second = other
@@ -200,7 +156,6 @@ class Path:
             second = self
 
         # Check that paths are sequential
-        # Modified to allow paths to connect at same time or t+1
         time_diff = second.vertexes[0].t - first.vertexes[-1].t
         if time_diff not in [0, 1]:  # Allow both same time and t+1
             print(f"Path gap: first ends t={first.vertexes[-1].t}, second starts t={second.vertexes[0].t}")
@@ -211,9 +166,7 @@ class Path:
             print(f"Position mismatch: first ends {first.vertexes[-1].pos}, second starts {second.vertexes[0].pos}")
             raise ValueError('Paths must be sequential.')
 
-        # Create new path
         new_path = copy.copy(first)
-        # If times are equal, skip the first vertex of second path to avoid duplication
         start_idx = 1 if time_diff == 0 else 1
         for i in range(start_idx, len(second)):
             new_path.insert(copy.copy(second.vertexes[i]))

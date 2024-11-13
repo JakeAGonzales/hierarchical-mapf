@@ -38,7 +38,7 @@ def extract_deterministic_paths(game: AbstractedRoutingGame, equilibrium_flows: 
         
         if equilibrium_path:
             paths[od_pair] = equilibrium_path
-            # Calculate actual travel time using game's cost function
+            # calculate actual travel time using game's cost function
             travel_time = sum(
                 game.edge_cost(
                     get_canonical_edge(equilibrium_path[i], equilibrium_path[i+1]),
@@ -69,7 +69,6 @@ def analyze_paths(game: AbstractedRoutingGame, paths: Dict) -> Dict:
         # Get subregion sequence
         subregion_sequence = extract_subregion_sequence(path, game.subregion_size)
         
-        # Calculate path statistics
         path_length = len(path)
         num_subregions = len(subregion_sequence)
         
@@ -92,10 +91,10 @@ def extract_subregion_sequence(path: List[Tuple[int, int]], subregion_size: int)
     if not path:
         return []
         
-    # Get sequence of subregions, including duplicates
+    # get sequence of subregions
     subregion_sequence = [get_subregion_coordinates(point, subregion_size) for point in path]
     
-    # Remove consecutive duplicates while preserving order
+    # remove consecutive duplicates while preserving order
     unique_sequence = []
     for subregion in subregion_sequence:
         if not unique_sequence or subregion != unique_sequence[-1]:

@@ -23,23 +23,7 @@ Evaluates the congestion and flow prediction models in a realistic scenario (doe
 4. predicts the temporal congestion across the grid
 5. visualizes the temporal congestion/flow prediction
 
-Note: do not change hyperparameters. Those are setup from when the model was trained and will not work if changed.
-hyperparameters:
-config = {
-        "num_of_epochs": 25,
-        "lr": 0.00001,
-        "weight_decay": 5e-4,
-        "hidden_channels": 8,
-        "in_channels": 3,
-        "out_channels": 1,
-        "num_gnn_layers": 1,
-        "num_attention_heads": 2,
-        "batch_size": 16,
-        "dropout_rate": 0.2,
-        "max_time_steps": 63,
-
 this script forms the basis for the congestion prediction in the full simulation
-
 
 """
 

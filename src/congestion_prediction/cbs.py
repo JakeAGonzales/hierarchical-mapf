@@ -393,18 +393,15 @@ class MAPFAnimation:
             ax.plot(ys[-1], xs[-1], 'o', color='#DC143C', markersize=8)
 
     def animate(self, frame):
-        self.ax.clear()  # Clear the previous frame
+        self.ax.clear()  
         env, goals = self.frames[frame]
         images = draw_environment(self.ax, env, goals, arrows=False, animated=True)
         
-        # Draw path trails
         self.draw_path_traces(self.ax, frame)
         
-        # Add frame counter
         self.ax.text(0.02, 0.98, f'Time step: {frame}', transform=self.ax.transAxes, 
                      verticalalignment='top', fontsize=10)
         
-        # Adjust axis labels and ticks
         self.ax.set_xticks(range(self.prob.env.size[1]))
         self.ax.set_yticks(range(self.prob.env.size[0]))
         self.ax.set_xticklabels(range(1, self.prob.env.size[1] + 1))
@@ -428,16 +425,12 @@ def convert_sampled_paths_to_cbs_format(sampled_paths, prob):
     """
     cbs_paths = []
     for agent_id, path in sampled_paths.items():
-        if not path:  # Skip empty paths
+        if not path:  
             continue
-        
-        # The path is already in PathVertex format
-        # Just need to check if it reaches the goal
+
         if path[-1].pos != prob.goals[agent_id]:
-            # Extend path to goal if needed
             extend_path_to_goal(path, prob.goals[agent_id], prob.env)
         
-        # Create CBS Path object with cost = path length
         cbs_paths.append(Path(path, len(path)))
     
     return cbs_paths

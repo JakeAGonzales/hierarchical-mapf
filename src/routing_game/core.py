@@ -77,19 +77,19 @@ class AbstractedRoutingGame:
         """Create the abstracted graph with connected subregions"""
         G = nx.Graph()
         
-        # First add all boundary positions and create fully connected subregions
+        # add all boundary positions and create fully connected subregions
         for i in range(self.num_subregions):
             for j in range(self.num_subregions):
                 boundary_positions = self._get_subregion_boundary_positions(i, j)
                 G.add_nodes_from(boundary_positions)
                 
-                # Create fully connected graph within subregion
+                # create fully connected graph within subregion
                 for pos1 in boundary_positions:
                     for pos2 in boundary_positions:
-                        if pos1 < pos2:  # Avoid self-loops and duplicate edges
+                        if pos1 < pos2:  # avoid self-loops and duplicate edges
                             G.add_edge(pos1, pos2)
         
-        # Connect adjacent subregions
+        # connect adjacent subregions
         self._connect_adjacent_regions(G)
         return G
 
@@ -99,7 +99,7 @@ class AbstractedRoutingGame:
             for j in range(self.num_subregions):
                 current_positions = self._get_subregion_boundary_positions(i, j)
                 
-                # Connect to right subregion
+                # connect to right subregion
                 if j < self.num_subregions - 1:
                     right_positions = self._get_subregion_boundary_positions(i, j + 1)
                     for pos in current_positions:
@@ -108,7 +108,7 @@ class AbstractedRoutingGame:
                             if aligned_pos in right_positions:
                                 G.add_edge(pos, aligned_pos)
                 
-                # Connect to bottom subregion
+                # connect to bottom subregion
                 if i < self.num_subregions - 1:
                     bottom_positions = self._get_subregion_boundary_positions(i + 1, j)
                     for pos in current_positions:
@@ -131,11 +131,11 @@ class AbstractedRoutingGame:
     def _get_grid_boundary_positions(self) -> List[Tuple[int, int]]:
         """Get boundary positions for full grid"""
         boundary = []
-        # Top and bottom edges
+        # top and bottom edges
         for j in range(self.grid_size):
             boundary.append((0, j))
             boundary.append((self.grid_size - 1, j))
-        # Left and right edges (excluding corners)
+        # left and right edges (excluding corners)
         for i in range(1, self.grid_size - 1):
             boundary.append((i, 0))
             boundary.append((i, self.grid_size - 1))
