@@ -167,7 +167,48 @@ def focal_astar(
 
     return None, float('inf'), float('inf')
 
-def update_paths(node: HCBSNode, ids: List[int], action_gen: RegionActionGenerator, omega: float) -> None:
+def a_star_search(
+    action_gen: RegionActionGenerator,
+    V: Dict,
+    E: Dict,
+    v: PathVertex,
+    goal: Goal,
+    constraints: Dict
+) -> Tuple[Optional[Path], float, float]:
+
+    if v in constraints:
+        return None, float('inf'), float('inf')
+        
+    OPEN = []
+    came_from = {v: None}
+    g_score = {v: 1}
+    f_score = g_score[v] + goal.heuristic(v.pos)
+    heappush(OPEN, [f_score, v])
+
+    while OPEN:
+        f, current = heappop(OPEN)
+        if goal.satisfied(current.pos):
+            # Build path like focal_astar does
+            vertices = []
+            while current is not None:
+                vertices.append(current)
+                current = came_from[current]
+            vertices.reverse()
+            return Path(vertices), len(vertices), f_score
+            
+        for (next_v, e) in action_gen.actions(current):
+            if next_v in constraints or e in constraints:
+                continue
+            new_g = g_score[current] + 1
+            if next_v not in g_score or new_g < g_score[next_v]:
+                came_from[next_v] = current
+                g_score[next_v] = new_g 
+                f_score = new_g + goal.heuristic(next_v.pos)
+                heappush(OPEN, [f_score, next_v])
+
+    return None, float('inf'), float('inf')
+
+def update_paths(node: HCBSNode, ids: List[int], action_gen: RegionActionGenerator, search_type: str, omega: float = 1.0) -> None:
     for id in ids:
         if id in node.vertexes:
             del node.vertexes[id]
@@ -180,7 +221,10 @@ def update_paths(node: HCBSNode, ids: List[int], action_gen: RegionActionGenerat
     for id in ids:
         goal = node.goals[id]
         c = node.constraints.get(id, {})
-        path, cost, lb = focal_astar(action_gen, V, E, node.x[id], goal, c, omega)
+        if search_type == 'focal':
+            path, cost, lb = focal_astar(action_gen, V, E, node.x[id], goal, c, omega)
+        else:
+            path, cost, lb = a_star_search(action_gen, V, E, node.x[id], goal, c)
         node.vertexes[id] = {}
         node.edges[id] = {}
         
@@ -202,7 +246,8 @@ def update_paths(node: HCBSNode, ids: List[int], action_gen: RegionActionGenerat
 def conflict_based_search(
     root: CBSNode,
     action_gen: RegionActionGenerator,
-    omega: float,
+    search_type: str = 'focal',
+    omega: float = 1.0,  # Only used for focal
     maxtime: float = 60.0,
     verbose: bool = False
 ) -> Tuple[CBSNode, float]:
@@ -282,7 +327,6 @@ def init_hcbs(env: HierarchicalEnvironment, x: Dict, final_goals: Dict, region_p
                 r2 = region_path[1]
                 N.goals[id] = BoundaryGoal(env, r, r2, final_goals[id])
     
-    # Initialize action generators
     for r in env.region_graph.nodes:
         region = env.region_graph.nodes[r]['env']
         env.action_generators[r] = RegionActionGenerator(env.gridworld, region)
@@ -292,7 +336,8 @@ def init_hcbs(env: HierarchicalEnvironment, x: Dict, final_goals: Dict, region_p
 def hierarchical_cbs(
     root: HCBSNode,
     env: HierarchicalEnvironment,
-    omega: float,
+    search_type: str = 'focal',
+    omega: float = 1.0,  # Only used for focal
     maxtime: float = 60.0,
     cbs_maxtime: float = 30.0,
     verbose: bool = False

@@ -142,14 +142,14 @@ def generate_flow_based_problem(env: HierarchicalEnvironment, config: RoutingGam
     
     return x, goals, region_paths, game, normalized_flows, all_flows, flow_paths
 
-def run_hierarchical_example():
+def run_hierarchical_example(search_type='focal'):  # or 'astar'
     output_dir = setup_output_dirs()
     print("\n=== Running Hierarchical MAPF Example ===")
     
     config = RoutingGameConfig(
         grid_size=32,
         subregion_size=8,
-        num_od_pairs=30,
+        num_od_pairs=60,
         total_flow=1.0,
         boundary_type="full_grid"
     )
@@ -170,6 +170,7 @@ def run_hierarchical_example():
     solution = hierarchical_cbs(
         root,
         env,
+        search_type='astar',
         omega=1.0,
         maxtime=60,
         cbs_maxtime=30,
