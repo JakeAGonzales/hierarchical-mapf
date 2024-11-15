@@ -59,7 +59,7 @@ def run_cbs_example(map_file: str, num_agents: int, create_vis: bool, time_limit
 
 def main():
     map_file = "maps/empty-32-32.map"  
-    run_cbs_example(map_file, num_agents=12, create_vis=True)
+    run_cbs_example(map_file, num_agents=32, create_vis=True)
 
 if __name__ == "__main__":
     main()

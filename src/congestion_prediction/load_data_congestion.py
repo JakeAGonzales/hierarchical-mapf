@@ -108,7 +108,7 @@ def build_edge_index(adjacency_list_dict: Dict[int, List[int]], num_of_nodes: in
         edges.extend((i, i) for i in range(num_of_nodes))
     return torch.tensor(edges, dtype=torch.long).t().contiguous()
 
-def load_data(data_folder: str, grid_size: int = 16) -> Tuple[List[Data], int]:
+def load_data(data_folder: str, grid_size: int = 32) -> Tuple[List[Data], int]:
     device = get_device() 
     print("Using Device: ", device)
     
@@ -139,8 +139,8 @@ def load_data(data_folder: str, grid_size: int = 16) -> Tuple[List[Data], int]:
     return pyg_dataset, max_time_steps
 
 if __name__ == "__main__":
-    data_folder = "data/8x8/train"
-    pyg_dataset, max_time_steps = load_data(data_folder)
+    data_folder = "data/32x32/test"
+    pyg_dataset, max_time_steps = load_data(data_folder, grid_size=32)
     print(f"Loaded {len(pyg_dataset)} instances with max time steps: {max_time_steps}")
     print(f"First instance features shape: {pyg_dataset[0].x.shape}")
     print(f"First instance labels shape: {pyg_dataset[0].y.shape}")

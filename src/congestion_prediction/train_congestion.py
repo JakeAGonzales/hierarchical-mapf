@@ -159,19 +159,19 @@ if __name__ == "__main__":
     set_seed(69)
     
     config = {
-        "num_of_epochs": 30,
-        "lr": 0.001,
-        "weight_decay": 1e-5,
+        "num_of_epochs": 25,
+        "lr": 0.0001,
+        "weight_decay": 5e-4,
         "hidden_channels": 8,
         "in_channels": 3,
         "out_channels": 1,
         "num_gnn_layers": 1,
         "num_attention_heads": 1,
         "batch_size": 16,
-        "dropout_rate": 0.2,
-        "max_time_steps": 16,        # make sure to change max time steps and grid size
-        "data_folder": "data/8x8/train",
-        "grid_size": 8,
+        "dropout_rate": 0.3,
+        "max_time_steps": 64,        # make sure to change max time steps and grid size
+        "data_folder": "data/32x32/train",
+        "grid_size": 32,
     }
     
     train_losses, val_losses = train_model(config)

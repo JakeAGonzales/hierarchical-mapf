@@ -11,8 +11,8 @@ import time
 import random
 
 # import functions from other scripts
-#from load_data_flow import load_data
-from load_data_congestion import load_data
+from load_data_flow import load_data
+#from load_data_congestion import load_data
 from nn import MAPFCongestionModel
 from utils import get_device, set_seed
 
@@ -106,7 +106,7 @@ def load_model(model_path, config, device):
     model.eval()
     return model
 
-def evaluate_instance(model, data, config, scaling_factor=3.0):
+def evaluate_instance(model, data, config, scaling_factor=5.0):
     device = next(model.parameters()).device
     data = data.to(device)
     
@@ -193,19 +193,19 @@ def create_gif(all_preds, all_labels, config):
 if __name__ == "__main__":
     set_seed(69)
     config = {
-        "num_of_epochs": 30,
-        "lr": 0.001,
-        "weight_decay": 1e-5,
+        "num_of_epochs": 25,
+        "lr": 0.00001,
+        "weight_decay": 5e-4,
         "hidden_channels": 8,
         "in_channels": 3,
         "out_channels": 1,
         "num_gnn_layers": 1,
         "num_attention_heads": 1,
         "batch_size": 16,
-        "dropout_rate": 0.2,
-        "max_time_steps": 31,        # make sure to change max time steps and grid size
-        "data_folder": "data/16x16/test",
-        "grid_size": 16,
+        "dropout_rate": 0.3,
+        "max_time_steps": 63,        # make sure to change max time steps and grid size
+        "data_folder": "data/32x32/test",
+        "grid_size": 32,
     }
 
     device = get_device()
@@ -213,7 +213,7 @@ if __name__ == "__main__":
     test_dataset, _ = load_data(config['data_folder'], config['grid_size'])
     test_loader = DataLoader(test_dataset, batch_size=config['batch_size'], shuffle=False)
 
-    model_path = "models/16x16/congestion_model.pth"  
+    model_path = "models/32x32/flow_model.pth"  
     model = load_model(model_path, config, device)
 
     
@@ -232,77 +232,3 @@ if __name__ == "__main__":
     visualize_difference(pred, ground_truth, config, threshold=0.0) 
 
     print("Evaluation complete. Check 'single_instance_comparison.gif' for visualization.")
-
-    '''
-    8x8 congestion parameters congestion_model.pth
-    config = {
-        "num_of_epochs": 30,
-        "lr": 0.001,
-        "weight_decay": 1e-5,
-        "hidden_channels": 8,
-        "in_channels": 3,
-        "out_channels": 1,
-        "num_gnn_layers": 1,
-        "num_attention_heads": 1,
-        "batch_size": 16,
-        "dropout_rate": 0.2,
-        "max_time_steps": 16,        # make sure to change max time steps and grid size
-        "data_folder": "data/8x8/test",
-        "grid_size": 8,
-    }
-
-    8x8 flow parameters flow_mode.pth
-    config = {
-        "num_of_epochs": 30,
-        "lr": 0.0001,
-        "weight_decay": 1e-5,
-        "hidden_channels": 8,
-        "in_channels": 3,
-        "out_channels": 1,
-        "num_gnn_layers": 1,
-        "num_attention_heads": 1,
-        "batch_size": 16,
-        "dropout_rate": 0.2,
-        "max_time_steps": 16,        # make sure to change max time steps and grid size
-        "data_folder": "data/8x8/test",
-        "grid_size": 8,
-    }
-
-
-
-    16x16 congestion parameters congestion_model.pth
-    config = {
-        "num_of_epochs": 30,
-        "lr": 0.001,
-        "weight_decay": 1e-5,
-        "hidden_channels": 8,
-        "in_channels": 3,
-        "out_channels": 1,
-        "num_gnn_layers": 1,
-        "num_attention_heads": 1,
-        "batch_size": 16,
-        "dropout_rate": 0.2,
-        "max_time_steps": 31,        # make sure to change max time steps and grid size
-        "data_folder": "data/16x16/test",
-        "grid_size": 16,
-    }
-
-    16x16 flow parameters flow_model.pth
-
-    config = {
-        "num_of_epochs": 30,
-        "lr": 0.00001,
-        "weight_decay": 5e-4,
-        "hidden_channels": 8,
-        "in_channels": 3,
-        "out_channels": 1,
-        "num_gnn_layers": 1,
-        "num_attention_heads": 1,
-        "batch_size": 16,
-        "dropout_rate": 0.4,
-        "max_time_steps": 31,        # make sure to change max time steps and grid size
-        "data_folder": "data/16x16/train",
-        "grid_size": 16,
-    }
-
-    '''
