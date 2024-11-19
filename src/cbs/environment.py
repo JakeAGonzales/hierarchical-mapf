@@ -1,43 +1,43 @@
 import networkx as nx
 import numpy as np
 from typing import List, Tuple, Set
+import copy
 
 class Environment:
     FREE, OBSTACLE, AGENT, GOAL, GOAL_REACHED = range(5)
 
-    def __init__(self, size: Tuple[int, int], obstacle_pos: List[Tuple[int, int]], agent_pos: List[Tuple[int, int]]):
+    def __init__(self, size, obstacle_pos, agent_pos):
         self.size = size
         self.obstacle_pos = set(obstacle_pos)
         self.agent_pos = agent_pos
         self.agents = list(range(len(agent_pos)))
         self.graph = self._create_graph()
         self.data = {}
-        
-        for pos in obstacle_pos:
-            self.data[pos] = self.OBSTACLE
-        for i, pos in enumerate(agent_pos):
-            self.data[pos] = self.AGENT
+        for cartesian_index in obstacle_pos:
+            self.data[cartesian_index] = self.OBSTACLE
+        for i, cartesian_index in enumerate(agent_pos):
+            self.data[cartesian_index] = self.AGENT
 
-    def _create_graph(self) -> nx.Graph:
+    def _create_graph(self):
         G = nx.grid_2d_graph(*self.size)
         for obs in self.obstacle_pos:
             G.remove_node(obs)
         return G
 
-    def get_obstacles(self) -> Set[Tuple[int, int]]:
-        return set(self.obstacle_pos)
+    def get_obstacles(self):
+        return copy.deepcopy(self.obstacle_pos)
     
-    def get_agents(self) -> List[Tuple[int, int]]:
-        return self.agent_pos.copy()
+    def get_agents(self):
+        return copy.deepcopy(self.agent_pos)
 
-    def update_agent_pos(self, ids: List[int], positions: List[Tuple[int, int]]):
+    def update_agent_pos(self, ids, positions):
         for i, j in enumerate(ids):
             if self.agent_pos[j] in self.data:
                 del self.data[self.agent_pos[j]]
             self.data[positions[i]] = self.AGENT
             self.agent_pos[j] = positions[i]
 
-    def dense_matrix(self) -> np.ndarray:
+    def dense_matrix(self):
         mat = np.zeros(self.size, dtype=int)
         for pos in self.data:
             mat[pos] = self.data[pos]

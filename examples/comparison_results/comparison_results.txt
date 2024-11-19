@@ -1,0 +1,83 @@
+MAPF Comparison Results
+=====================
+
+
+Results for 10 agents:
+------------------------------
+HCBS Success Rate: 100.0%
+CBS Success Rate: 100.0%
+
+Computation Times:
+HCBS: 0.02 ± 0.01s
+CBS: 0.02 ± 0.01s
+Routing Game: 0.38 ± 0.10s
+
+Average Path Costs:
+HCBS: 21.81 ± 3.28
+CBS: 20.72 ± 3.34
+
+==================================================
+
+Results for 20 agents:
+------------------------------
+HCBS Success Rate: 100.0%
+CBS Success Rate: 90.0%
+
+Computation Times:
+HCBS: 0.06 ± 0.01s
+CBS: 0.28 ± 0.47s
+Routing Game: 0.82 ± 0.17s
+
+Average Path Costs:
+HCBS: 21.99 ± 2.96
+CBS: 20.14 ± 2.41
+
+==================================================
+
+Results for 30 agents:
+------------------------------
+HCBS Success Rate: 100.0%
+CBS Success Rate: 100.0%
+
+Computation Times:
+HCBS: 0.13 ± 0.03s
+CBS: 1.29 ± 2.11s
+Routing Game: 1.67 ± 0.15s
+
+Average Path Costs:
+HCBS: 22.90 ± 1.75
+CBS: 21.70 ± 1.74
+
+==================================================
+
+Results for 40 agents:
+------------------------------
+HCBS Success Rate: 57.1%
+CBS Success Rate: 14.3%
+
+Computation Times:
+HCBS: 0.21 ± 0.03s
+CBS: 1.43 ± 0.00s
+Routing Game: 2.25 ± 0.27s
+
+Average Path Costs:
+HCBS: 22.38 ± 1.54
+CBS: 22.80 ± 0.00
+
+==================================================
+
+Results for 50 agents:
+------------------------------
+HCBS Success Rate: 66.7%
+CBS Success Rate: 33.3%
+
+Computation Times:
+HCBS: 0.56 ± 0.45s
+CBS: 31.73 ± 24.67s
+Routing Game: 2.78 ± 0.21s
+
+Average Path Costs:
+HCBS: 22.72 ± 1.78
+CBS: 22.34 ± 0.32
+
+==================================================

@@ -1,3 +1,4 @@
+# core.py
 from dataclasses import dataclass
 import networkx as nx
 from typing import Dict, List, Tuple, Any
@@ -13,6 +14,7 @@ from .mapf_utils import (
     LocationGoal,
     MAPFSolution
 )
+
 
 class GridRegion:
     def __init__(self, grid_world: GridWorld, location: Tuple[int, int], size: Tuple[int, int]):
@@ -202,3 +204,4 @@ class HCBSNode:
 
     def __lt__(self, other: Any) -> bool:
         return False  # Default comparison for priority queue
+    

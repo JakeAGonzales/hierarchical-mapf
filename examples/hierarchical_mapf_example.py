@@ -25,6 +25,7 @@ from src.hierarchical_mapf import (
     create_solution_animation
 )
 
+
 def setup_output_dirs() -> Path:
     """Create output directories if they don't exist"""
     output_dir = Path("output/")
@@ -104,8 +105,6 @@ def create_hierarchical_environment(config: RoutingGameConfig):
     return HierarchicalEnvironment(gridworld, region_graph)
 
 def generate_flow_based_problem(env: HierarchicalEnvironment, config: RoutingGameConfig):
-    """Generate a MAPF problem using abstracted routing game"""
-
     game = AbstractedRoutingGame(config)
     
     print("\nRunning Frank-Wolfe optimization...")
@@ -119,10 +118,35 @@ def generate_flow_based_problem(env: HierarchicalEnvironment, config: RoutingGam
     print("\nExtracting deterministic paths...")
     flow_paths, _ = extract_deterministic_paths(game, normalized_flows)
     
-    # Convert to hierarchical MAPF format
+    print("\nExtracting boundary points from flow paths...")
+    boundary_assignments = {}
+    
+    def get_subregion(point):
+        return (point[0] // config.subregion_size, point[1] // config.subregion_size)
+    
+    for idx, (origin, dest) in enumerate(game.od_pairs):
+        if (origin, dest) not in flow_paths:
+            continue
+            
+        path = flow_paths[(origin, dest)]
+        agent_boundary_pairs = []
+        
+        for i in range(len(path)-1):
+            curr_point = path[i]
+            next_point = path[i+1]
+            
+            curr_region = get_subregion(curr_point)
+            next_region = get_subregion(next_point)
+            
+            if curr_region != next_region:
+                agent_boundary_pairs.append((curr_point, next_point))
+        
+        boundary_assignments[idx] = agent_boundary_pairs
+
     start_pos = {}
     goals = {}
     region_paths = {}
+    region_boundary_points = {}
     
     for idx, (origin, dest) in enumerate(game.od_pairs):
         start_pos[idx] = origin
@@ -132,15 +156,28 @@ def generate_flow_based_problem(env: HierarchicalEnvironment, config: RoutingGam
             path = flow_paths[(origin, dest)]
             sequence = get_region_sequence(path, config.subregion_size)
             region_paths[idx] = sequence
+            
+            if idx in boundary_assignments:
+                region_boundary_points[idx] = {}
+                boundary_pairs = boundary_assignments[idx]
+                for i, region in enumerate(sequence[:-1]):
+                    region_boundary_points[idx][region] = {
+                        'entry': boundary_pairs[i][0] if i == 0 else boundary_pairs[i-1][1],
+                        'exit': boundary_pairs[i][0]
+                    }
+                if sequence:
+                    region_boundary_points[idx][sequence[-1]] = {
+                        'entry': boundary_pairs[-1][1] if boundary_pairs else None,
+                        'exit': None
+                    }
         else:
-            # Fallback to direct path if flow path not found
-            start_region = get_subregion_coords(origin, config.subregion_size)
-            goal_region = get_subregion_coords(dest, config.subregion_size)
+            start_region = get_subregion(origin)
+            goal_region = get_subregion(dest)
             region_paths[idx] = nx.shortest_path(env.region_graph, start_region, goal_region)
     
     x = {i: PathVertex(start_pos[i], 0) for i in range(len(game.od_pairs))}
     
-    return x, goals, region_paths, game, normalized_flows, all_flows, flow_paths
+    return x, goals, region_paths, game, normalized_flows, all_flows, flow_paths, region_boundary_points
 
 def run_hierarchical_example(search_type='focal'):  # or 'astar'
     output_dir = setup_output_dirs()
@@ -158,22 +195,23 @@ def run_hierarchical_example(search_type='focal'):  # or 'astar'
     env = create_hierarchical_environment(config)
     
     print("\nGenerating flow-based problem...")
-    x, goals, region_paths, game, flows, all_flows, flow_paths = generate_flow_based_problem(
+    x, goals, region_paths, game, flows, all_flows, flow_paths, region_boundary_points = generate_flow_based_problem(
         env, config
     )
 
     print("\nInitializing HCBS...")
-    root = init_hcbs(env, x, goals, region_paths)
+    root = init_hcbs(env, x, goals, region_paths, region_boundary_points)
     
     print("\nRunning Hierarchical CBS...")
     start_time = time.time()
     solution = hierarchical_cbs(
         root,
         env,
+        region_boundary_points,  
         search_type='astar',
         omega=1.0,
         maxtime=60,
-        cbs_maxtime=30,
+        cbs_maxtime=60,
         verbose=True
     )
     comp_time = time.time() - start_time
@@ -182,6 +220,12 @@ def run_hierarchical_example(search_type='focal'):  # or 'astar'
     if solution:
         print("\nSolution found!")
         mapf_solution = solution.make_solution()
+
+        print("\n")
+        print("*" * 50)
+        print(f"SUCCESSFULLY SOLVED FOR {config.num_od_pairs} AGENTS")
+        print("*" * 50)
+        print("\n")
         
         # Verify solution
         print("\nVerifying solution...")

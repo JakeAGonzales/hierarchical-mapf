@@ -1,3 +1,4 @@
+#search.py
 from heapq import heappush, heappop, heapify
 import time
 import copy
@@ -308,7 +309,50 @@ def conflict_based_search(
     node.cost = float('inf')
     return node, float('inf')
 
-def init_hcbs(env: HierarchicalEnvironment, x: Dict, final_goals: Dict, region_paths: Dict) -> HCBSNode:
+class PreferredBoundaryGoal(Goal):
+    """A goal that prefers certain boundary points but allows any valid boundary crossing"""
+    def __init__(self, env: HierarchicalEnvironment, source: tuple, dest: tuple, 
+                 final_goal: tuple, preferred_point: tuple = None):
+        if (source, dest) not in env.region_graph.edges:
+            raise ValueError(f"source {source} and dest {dest} are not connected in the region graph")
+        
+        # Get all possible boundary points
+        edges = env.region_graph.edges[source,dest]['boundary']
+        region = env.region_graph.nodes[source]['env']
+        self.boundary_points = [v for e in edges for v in e if not region.contains_node(v)]
+        
+        # Store preferred point if provided
+        self.preferred_point = preferred_point
+        self.final_goal = final_goal
+        
+        # Weight for preferred point in heuristic
+        self.preference_weight = 0.9  # Can be tuned
+        
+    def heuristic(self, pos: tuple) -> float:
+        # Calculate distance to all boundary points
+        min_boundary_dist = min(abs(pos[0] - b[0]) + abs(pos[1] - b[1]) 
+                              for b in self.boundary_points)
+        
+        if self.preferred_point is not None:
+            # Calculate distance to preferred point
+            preferred_dist = (abs(pos[0] - self.preferred_point[0]) + 
+                            abs(pos[1] - self.preferred_point[1]))
+            
+            # Weighted combination of distances
+            return (self.preference_weight * preferred_dist + 
+                   (1 - self.preference_weight) * min_boundary_dist)
+        
+        return min_boundary_dist
+    
+    def satisfied(self, pos: tuple) -> bool:
+        return pos in self.boundary_points
+
+def init_hcbs(env: HierarchicalEnvironment, 
+              x: Dict, 
+              final_goals: Dict, 
+              region_paths: Dict,
+              region_boundary_points: Dict) -> HCBSNode:
+    
     root = HCBSNode(x, final_goals, region_paths)
     cbs_nodes = {r: CBSNode({},{}) for r in env.region_graph.nodes}
     root.cbs_nodes = cbs_nodes
@@ -321,12 +365,27 @@ def init_hcbs(env: HierarchicalEnvironment, x: Dict, final_goals: Dict, region_p
         for id in agents:
             N.x[id] = x[id]
             region_path = region_paths[id]
+            
             if len(region_path) == 1:
+                # Single region case - goal is final destination
                 N.goals[id] = LocationGoal(final_goals[id])
             else:
+                # Get the next region
                 r2 = region_path[1]
-                N.goals[id] = BoundaryGoal(env, r, r2, final_goals[id])
+                
+                # Check if we have a preferred boundary point
+                preferred_point = None
+                if (id in region_boundary_points and 
+                    r in region_boundary_points[id] and 
+                    'exit' in region_boundary_points[id][r]):
+                    preferred_point = region_boundary_points[id][r]['exit']
+                
+                # Create goal with preferred point
+                N.goals[id] = PreferredBoundaryGoal(
+                    env, r, r2, final_goals[id], preferred_point
+                )
     
+    # Initialize action generators
     for r in env.region_graph.nodes:
         region = env.region_graph.nodes[r]['env']
         env.action_generators[r] = RegionActionGenerator(env.gridworld, region)
@@ -336,8 +395,9 @@ def init_hcbs(env: HierarchicalEnvironment, x: Dict, final_goals: Dict, region_p
 def hierarchical_cbs(
     root: HCBSNode,
     env: HierarchicalEnvironment,
+    region_boundary_points: Dict,  
     search_type: str = 'focal',
-    omega: float = 1.0,  # Only used for focal
+    omega: float = 1.0,  
     maxtime: float = 60.0,
     cbs_maxtime: float = 30.0,
     verbose: bool = False
@@ -392,7 +452,7 @@ def hierarchical_cbs(
                 if verbose:
                     print(f'# of completed trips {-M.goal_cost}')
                     print('advancing agents...')
-                new_node = advance_agents(M, env)
+                new_node = advance_agents(M, env, region_boundary_points)  # Pass boundary points
                 for r in new_node.cbs_nodes:
                     update_region(new_node, env, r, omega, cbs_maxtime)
                 
@@ -426,10 +486,10 @@ def branch_hcbs(node: HCBSNode, r: tuple, id: int, c: Any) -> HCBSNode:
     N.apply_constraint(id, c)
     return M
 
-def advance_agents(node: HCBSNode, env: HierarchicalEnvironment) -> HCBSNode:
+def advance_agents(node: HCBSNode, env: HierarchicalEnvironment, region_boundary_points: Dict) -> HCBSNode:
     M = copy.deepcopy(node)
     
-    # Advance the agent trip index
+    # Advance trip indices
     for id in M.trip_idx:
         region_path = M.region_paths[id]
         if M.trip_idx[id] < len(region_path):
@@ -467,11 +527,22 @@ def advance_agents(node: HCBSNode, env: HierarchicalEnvironment) -> HCBSNode:
         r2 = region_path[trip_idx]
         M.cbs_nodes[r2].x[id] = path[-1]
         
-        # Set goal in next region
+        # Set goal for next region
         if r2 == region_path[-1]:
             M.cbs_nodes[r2].goals[id] = LocationGoal(M.final_goals[id])
         else:
             r3 = region_path[trip_idx+1]
-            M.cbs_nodes[r2].goals[id] = BoundaryGoal(env, r2, r3, M.final_goals[id])
+            
+            # Get preferred boundary point if available
+            preferred_point = None
+            if (id in region_boundary_points and 
+                r2 in region_boundary_points[id] and 
+                'exit' in region_boundary_points[id][r2]):
+                preferred_point = region_boundary_points[id][r2]['exit']
+            
+            # Create goal with preferred point
+            M.cbs_nodes[r2].goals[id] = PreferredBoundaryGoal(
+                env, r2, r3, M.final_goals[id], preferred_point
+            )
             
     return M

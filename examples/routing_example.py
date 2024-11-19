@@ -26,9 +26,9 @@ def run_routing_example():
     print("\n=== Running Abstracted Routing Example ===")
     
     config = RoutingGameConfig(
-        grid_size=32,
+        grid_size=16,
         subregion_size=8,
-        num_od_pairs=20,
+        num_od_pairs=5,
         total_flow=1.0,
         boundary_type="full_grid"
     )
