@@ -19,9 +19,11 @@ class RoutingGameConfig:
     boundary_type: str = "full_grid"  # or "all_boundaries"
 
 class AbstractedRoutingGame:
-    def __init__(self, config: Optional[RoutingGameConfig] = None):
+    def __init__(self, config: Optional[RoutingGameConfig] = None, A_matrix = None):
         if config is None:
             config = RoutingGameConfig()
+
+        print("USING THIS CORRECTLY")
             
         self.config = config
         self.grid_size = config.grid_size
@@ -30,7 +32,8 @@ class AbstractedRoutingGame:
         self.total_flow = config.total_flow
         self.num_subregions = config.grid_size // config.subregion_size
         self.boundary_type = config.boundary_type
-        
+        self.A = A_matrix
+
         if self.boundary_type not in ["full_grid", "all_boundaries"]:
             raise ValueError("boundary_type must be either 'full_grid' or 'all_boundaries'")
         
@@ -41,7 +44,38 @@ class AbstractedRoutingGame:
 
     def edge_cost(self, edge, flow: float) -> float:
         """Calculate cost for a single edge given its flow"""
-        return 1 + 0.5 * flow
+        if self.A is None:
+            return 1 + 0.5 * flow  # fallback to original
+            
+        # Map edge coordinates to 16x16 subregion
+        (x1,y1), (x2,y2) = edge
+        x1, y1 = x1 % 16, y1 % 16
+        x2, y2 = x2 % 16, y2 % 16
+        
+        # Get position indices along boundaries
+        # A given point is mapped to its index based on position along boundary
+        def get_boundary_index(x, y):
+            if y == 0:  # top edge
+                return x
+            if y == 15:  # bottom edge
+                return x + 16
+            if x == 0:  # left edge
+                return y + 32 - 1  # -1 for no corner double count
+            if x == 15:  # right edge
+                return y + 46 - 1  # -1 for no corner double count
+                
+        idx1 = get_boundary_index(x1, y1)
+        idx2 = get_boundary_index(x2, y2)
+        
+        # Ensure canonical ordering
+        if idx1 > idx2:
+            idx1, idx2 = idx2, idx1
+            
+        # Convert to edge index in A matrix
+        edge_idx = (idx1 * 59 - (idx1 * (idx1-1))//2) + (idx2 - idx1 - 1)
+        
+        # Return latency
+        return 1.0 + self.A[edge_idx][edge_idx] * flow
 
     def update_edge_costs(self) -> None:
         """Update all edge costs based on current flows"""
