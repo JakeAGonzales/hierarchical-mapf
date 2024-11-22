@@ -1,3 +1,5 @@
 .DS_Store
 **/.DS_Store
 src/congestion_prediction/data/
+examples/results_reg.npz
+examples/results_sym.npz

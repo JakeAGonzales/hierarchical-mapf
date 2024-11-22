@@ -1,9 +1,7 @@
-# examples/routing_example.py
-
 import os
 import time
+import numpy as np
 from pathlib import Path
-
 from src.routing_game import (
     AbstractedRoutingGame,
     RoutingGameConfig,
@@ -21,20 +19,22 @@ def setup_output_dirs() -> Path:
     return gif_dir
 
 def run_routing_example():
-    output_dir = setup_output_dirs()
+    results = np.load("results_reg.npz")
+    A_matrix = results['A']
     
+    output_dir = setup_output_dirs()
     print("\n=== Running Abstracted Routing Example ===")
     
     config = RoutingGameConfig(
-        grid_size=16,
-        subregion_size=8,
+        grid_size=32,
+        subregion_size=16,
         num_od_pairs=5,
         total_flow=1.0,
         boundary_type="full_grid"
     )
     
     print("\nInitializing routing game...")
-    game = AbstractedRoutingGame(config)
+    game = AbstractedRoutingGame(config=config, A_matrix=A_matrix)
     
     print("\nRunning Frank-Wolfe algorithm...")
     normalized_flows, costs, computation_time, all_flows = game.run_frank_wolfe(
@@ -57,16 +57,15 @@ def run_routing_example():
     for od_pair, analysis in path_analysis.items():
         origin, dest = od_pair
         print(f"\nPath from {origin} to {dest}:")
-        print(f"  Path length: {analysis['path_length']}")
-        print(f"  Number of subregions: {analysis['num_subregions']}")
-        print(f"  Travel time: {travel_times[od_pair]:.2f}")
-        print(f"  Subregion sequence: {analysis['subregion_sequence']}")
+        print(f" Path length: {analysis['path_length']}")
+        print(f" Number of subregions: {analysis['num_subregions']}")
+        print(f" Travel time: {travel_times[od_pair]:.2f}")
+        print(f" Subregion sequence: {analysis['subregion_sequence']}")
     
     print("\nGenerating visualizations...")
-    
     plot_cost_evolution(
         costs,
-        output_dir / "cost_evolution.png"  # Using Path for proper path joining
+        output_dir / "cost_evolution.png"
     )
     
     print("\nCreating flow animation...")
@@ -74,7 +73,7 @@ def run_routing_example():
         game,
         all_flows,
         paths,
-        output_dir / "flow_evolution.gif"  # Using Path for proper path joining
+        output_dir / "flow_evolution.gif"
     )
     
     print(f"\nVisualizations saved to {output_dir}")

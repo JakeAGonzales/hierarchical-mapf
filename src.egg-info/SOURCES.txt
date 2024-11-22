@@ -1,7 +1,9 @@
 README.md
 setup.py
 examples/__init__.py
+examples/cbs.py
 examples/cbs_example.py
+examples/compare.py
 examples/hierarchical_mapf_example.py
 examples/routing_example.py
 examples/utils.py
